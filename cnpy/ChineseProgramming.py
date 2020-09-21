@@ -1,71 +1,21 @@
 import sys
 import getopt
 import os
+import json
 
 
 class Reader:
-    def __init__(self, file):
+    def __init__(self, file, config_file="config.json"):
         self.file = open(file)
         self.lines = self.file.readlines()
-        self.operators = ["+", "-", "*", "/", "%"]
-        self.separators = [">", "<", "=", ":", "[", "]", "(", ")", ",", "@", "!", "{", "}", ".", "的", "当", "等于"] + self.operators
+        with open(config_file) as f:
+            config = json.loads(f.read())
+            data = config["data"]
+        self.operators = data["operators"]
+        self.separators = data["separators"] + self.operators
         self.string_tokens = ["'", '"']
         self.output = ""
-        self.keywords = {
-            "如果": "if",
-            "又如果": "elif",
-            "否则": "else",
-            "当": "while",
-            "对于": "for",
-            "区间": "range",
-            "输入": "input",
-            "打印": "print",
-            "属于": "in",
-            "是": "is",
-            "就是": "is",
-            "或": "or",
-            "或者": "or",
-            "且": "and",
-            "并且": "and",
-            "非": "not",
-            "没有": "not",
-            "不属于": "not in",
-            "返回": "return",
-            "先返回": "yield",
-            "打开": "open",
-            "整数": "int",
-            "浮点数": "float",
-            "字符串": "str",
-            "定义类": "class",
-            "类": "class",
-            "定义": "def",
-            "初始化": "__init__",
-            "真": "True",
-            "假": "False",
-            "空": "None",
-            "以": "with",
-            "把": "with",
-            "称作": "as",
-            "退出": "break",
-            "继续": "continue",
-            "从": "from",
-            "导入": "import",
-            "跳过": "pass",
-            "尝试": "try",
-            "捕捉": "except",
-            "最后": "finally",
-            "抛出": "raise",
-            "闭包": "lambda",
-            "删除": "del",
-            "等于": "==",
-            "大于": ">",
-            "小于": "<",
-            "大于等于": ">=",
-            "小于等于": "<=",
-            "不等于": "!=",
-            "的": ".",
-
-        }
+        self.keywords = data["keywords"]
         self.keywords_list = self.keywords.keys()
         self.string_starter = None
 
@@ -252,16 +202,20 @@ class Reader:
 
 
 if __name__ == "__main__":
-    args = sys.argv[-2:]
-    input_file, output_file = args
-    reader = Reader(input_file)
+    args = sys.argv[-3:]
+    input_file, output_file, working_dir = args
+    nowdir = os.path.abspath(".")
+    os.chdir(working_dir)
+    reader = Reader(input_file, os.path.join(nowdir, "config.json"))
     reader.parse()
+    print(nowdir)
     if output_file == "/":
-        output_file = input_file.strip(".cpy") + ".py"
+        _, inf = os.path.split(input_file)
+        output_file = inf.strip(".cpy") + ".py"
     if len(output_file) < 4 or output_file[-3:] != ".py":
         output_file += ".py"
     if not os.path.exists(".CP_TEMP"):
         os.makedirs(".CP_TEMP")
-    reader.write_output(".CP_TEMP/" + output_file)
+    reader.write_output(os.path.join(".CP_TEMP", output_file))
 
 
