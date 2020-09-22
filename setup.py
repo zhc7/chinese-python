@@ -15,6 +15,11 @@ setup(name="flamechess",
       long_description_content_type="text/markdown",
       url="https://github.com/zhc7/chinese-python",
       packages=find_namespace_packages(),
+      entry_point={
+          "console_scripts": [
+              "ccpy = cnpy.ChineseProgramming:main"
+          ]
+      },
       install_requires=["requests", "chessterm-sdk", "python-socketio[client]"],
       classifiers=[
           "Environment :: Console",

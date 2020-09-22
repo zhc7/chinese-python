@@ -201,21 +201,27 @@ class Reader:
 
 
 
-if __name__ == "__main__":
-    args = sys.argv[-3:]
-    input_file, output_file, working_dir = args
-    nowdir = os.path.abspath(".")
-    os.chdir(working_dir)
-    reader = Reader(input_file, os.path.join(nowdir, "config.json"))
+def main():
+    file_dir = os.path.split(__file__)[0]
+    config_file = os.path.join(file_dir, "config.json")
+    args = sys.argv[-2:]
+    input_file, output_file = args
+    reader = Reader(input_file, config_file)
     reader.parse()
-    print(nowdir)
     if output_file == "/":
         _, inf = os.path.split(input_file)
         output_file = inf.strip(".cpy") + ".py"
     if len(output_file) < 4 or output_file[-3:] != ".py":
         output_file += ".py"
-    if not os.path.exists(".CP_TEMP"):
-        os.makedirs(".CP_TEMP")
-    reader.write_output(os.path.join(".CP_TEMP", output_file))
+    if os.path.exists(output_file):
+        print("file already existed")
+        return -1
+    reader.write_output(output_file)
+    print("Done")
+    return 0
+
+
+if __name__ == "__main__":
+    main()
 
 
